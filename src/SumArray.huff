@@ -12,5 +12,34 @@
 
 
 #define macro MAIN() = takes(0) returns(0) {
+//sum every item in array
+push0 calldataload 0xe0 shr             //[fn_selector]
 
+//duplicate item on top of stack - fn_selector and check
+dup1 __FUNC_SIG(sumArray) eq sumArray jumpi
+
+//revert if no matches
+push0 dup1 revert
+
+//continue with sumArray fn
+sumArray:
+
+0x44 0x24                               //[length,calldata_offset]
+                          
+0x44 calldataload 0x01                   //[index(1),array[0],length,calldata_offset]
+start jump
+continue:  
+    eq end jumpi
+    start:
+    dup1 0x20 mul dup5 add calldataload         //[a(i+1), idx(i), curr_sum,size_arr,lth,offset]
+    swap1 swap2 add                             //[new_sum, index(i),size]
+    dup3 swap1 swap2                            //[index(i),size, new_sum,size]
+    0x01 add                                   //[index(i+1), size, new_sum,size]
+    dup1 swap2                                 //[size, index(i+1), index(i+1), new_sum,size]
+    
+    continue jump
+end:
+swap1
+push0 mstore
+0x20 push0 return
 }

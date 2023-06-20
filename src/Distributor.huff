@@ -14,5 +14,44 @@
 
 
  #define macro MAIN() = takes(0) returns(0) {
-   
+   push0 calldataload 0xe0 shr
+
+   dup1 __FUNC_SIG(distribute) eq distributed jumpi
+
+   push0 push0 revert
+
+
+   distributed:
+        //handling dynamic type - broken up into 3 pieces each a word(32bytes) each
+        //need to find length
+        //'split' callvalue evenly between all addresses in the array
+        //loop and transfer amount to each address
+        //revert on empty array
+        0x44 0x24                                   //[length_offset,val_offset]
+        //get length of calldata
+        0x24 calldataload dup1 not_empty jumpi
+            push0 push0 revert
+        not_empty:
+        0x44 calldataload push0                     //[idx(0),arr[0],calldataL,l,v]
+
+        //get distribution amt
+        swap2 callvalue div                         //[distAmt,arr(0),idx[0],l,v]
+        start jump
+
+        continue:
+        //logic to determine if continue loop
+        swap1 0x01 add                              //[idx(i+1),dAmt,l,v]
+        dup1 0x24 calldataload eq end jumpi
+        dup1 0x20 mul dup5 add calldataload         //[arr(i),idx(i+1),dAmt,l,v]
+        swap1 swap2                                 //[dAmt,arr(i),idx(i),l,v]
+
+        start:
+        dup1 swap2                                  //[arr(i),dAmt,dAmt,i(i),l,v]
+        push0 push0 push0 push0                     //[0,0,0,0,arr(i),dAmt,dAmt,i(i),l,v]
+        swap5 swap1 swap4 gas                       //[gas,arr(i),dAmt,0,0,0,0,dAmt,i(i),l,v]
+        call pop                                    //[dAmt,i(i),l,v]
+        continue jump
+        end:
+        0x20 push0 mstore
+        0x20 push0 return
  }

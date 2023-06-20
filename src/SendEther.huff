@@ -12,5 +12,16 @@
 
 
  #define macro MAIN() = takes(0) returns(0) {
-    
+    push0 calldataload 0xe0 shr
+
+    dup1 __FUNC_SIG(sendEther) eq sendEther jumpi
+
+    push0 push0 revert
+
+    sendEther:
+         //send amt of eth in 'callvalue' back to user
+         push0 push0 push0 push0                            //[argOffset,argSize,retOffset,retSize]
+         callvalue 0x04 calldataload push0                  //[gas,to,amt,argO,argS,retO,retS]
+         call
+
  }

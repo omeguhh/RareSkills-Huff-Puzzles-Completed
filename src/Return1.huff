@@ -7,5 +7,12 @@
 
 
 #define macro MAIN() = takes(0) returns(0) {
-    
+    //obj: return 1
+    0x01 push0                      //[0,1]
+    mstore                          //[]
+
+
+    //return first word
+    0x20 push0                       //[0,32]
+    return                          //[]
 }

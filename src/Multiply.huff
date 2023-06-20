@@ -13,5 +13,41 @@
 
 
 #define macro MAIN() = takes(0) returns(0) {
+//get func sig by grabbing calldata from 0x00 and bitshifting right 0xe0 (224bits)
 
+//to be left with 32 bits / 4bytes fn selector then multiply inputs (checking for overflow)
+
+//return the product
+
+0x00 calldataload 0xe0 shr              //[fn_selctor]
+
+__FUNC_SIG(multiply) eq multiply jumpi
+
+    push0 dup1 revert
+
+multiply:
+    //get both inputs offset by first 4 bytes 
+    0x04 calldataload                   //[a]
+    0x24 calldataload                   //[b,a]
+
+    //check for overflow
+    dup1 dup3                           //[a,b,b,a]
+    dup1 dup3                           //[b,a,a,b,b,a]
+    mul                                 //[prod,a,b,b,a]
+    dup1 not_zero_prod jumpi            //[prod,a,b,b,a]
+        dup1 push0                      //[prod,prod,a,b,b,a]
+        mstore                          //[]
+
+        //return 0 value
+        0x20 push0                      //[0,32]
+        return    
+    not_zero_prod:
+    div                                 //[res(prod/a),b,b,a]
+    eq success jumpi                    //[res(product == b),b,a]
+        push0 push0 revert
+    success:
+    mul                                 //[product]
+    push0 mstore                        //[]
+    0x20 push0                          //[0,32]
+    return
 }

@@ -16,5 +16,22 @@
 
 
 #define macro MAIN() = takes(0) returns(0) {
-    
+    //store or read value in storage
+    push0 calldataload 0xe0 shr                 //[fn_selector]
+
+    dup1 __FUNC_SIG(store) eq store jumpi
+    dup1 __FUNC_SIG(read) eq read jumpi
+
+    push0 dup1 revert
+
+    //store value in storage
+    store:
+    //get calldata offset by fn_selector and store at slot 0
+    0x04 calldataload push0                     //[0,val]
+    sstore
+
+    read:
+    push0 sload                                 //[val_storage_zero]
+    push0 mstore                                //[]
+    0x20 push0 return
 }

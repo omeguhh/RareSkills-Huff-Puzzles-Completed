@@ -8,5 +8,11 @@
  */
 
 #define macro MAIN() = takes(0) returns(0) {
-   
+   //get the eth balance of msg.sender
+   caller balance push0                 //[0,balance]
+   mstore                               //[]
+
+   //return msg.sender balance
+   0x20 push0                           //[0,32]
+   return
 }

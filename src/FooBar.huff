@@ -16,5 +16,21 @@
 
 
 #define macro MAIN() = takes(0) returns(0) {
+//get fn selector and return uint256 based on above specs
+push0 calldataload 0xe0 shr                  //[fn_selector]
 
+dup1 __FUNC_SIG(foo) eq foo jumpi
+dup1 __FUNC_SIG(bar) eq bar jumpi
+
+    push0 push0 revert
+
+foo:
+//per specs return 2
+    0x02 push0 mstore           //[]
+    0x20 push0 return           //[]
+
+bar:
+    //per specs return 3
+    0x03 push0 mstore           //[]
+    0x20 push0 return           //[]
 }

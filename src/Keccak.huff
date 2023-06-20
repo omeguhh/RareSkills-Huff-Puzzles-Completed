@@ -9,5 +9,30 @@
 
 
  #define macro MAIN() = takes(0) returns(0) {
-    
+    //take data from call and store in memory
+    //dynamic types likes strings and bytes are encoded in 3 parts, each a full word (32 bytes).
+    //see Huff docs - "Hello World!" example - this means we need to load the calldata 3 times at three seperate offsets (since calldataload returns 32 byte value from the given offset in calldata and all bytes after the end of the calldata are set to zero).
+
+    //get 1st word of dynamic data which is offset at 0x00
+    push0 calldataload                               //[offset]
+    push0                                           //[0x00,offset]
+    mstore                                          //[]
+
+    //get 2nd word of dynamic data which is offset at 0x20
+    0x20 calldataload                               //[length_of_dynamic_data]
+    0x20                                            //[offset_to_store_in_mem, length]
+    mstore                                          //[]
+
+    //get 3rd word of dynamic data which is offset at 0x40
+    0x40 calldataload                               //[value_of_dyn_data]
+    0x40                                            //[mem_offset, value]
+    mstore                                          //[]
+
+    //store keccack of calldata in memory
+    0x60 push0                                      //[offset,byte_size_to_read_mem]
+    sha3                                            //[keccack256_hash_calldata]
+    push0 mstore                                    //[]
+
+    //return keccack of calldata
+    0x20 push0 return                               //[]
  }

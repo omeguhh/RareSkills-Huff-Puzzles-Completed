@@ -9,5 +9,9 @@
  */
 
 #define macro MAIN() = takes(0) returns(0) {
-
+    //check to make sure no eth is sent with the txn
+callvalue push0                 //[0,msg.value]
+eq no_eth jumpi
+    push0 push0 revert
+no_eth:
 }

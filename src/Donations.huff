@@ -8,5 +8,50 @@
 #define function donated(address) payable returns(uint256)
 
 #define macro MAIN() = takes(0) returns(0) {
-    
+    push0 calldataload 0xe0 shr
+
+    dup1 __FUNC_SIG(donated) eq donate jumpi
+
+    //we want to track the value sent by caller and store that value in storage
+    //we need to create a mapping to track our users donations.
+    //to do that we'll start by creating a key using the slot and address
+    //which maps to their contributions. 
+    caller push0                                    //[0,msg.sender]
+    mstore                                          //[]
+
+    //now we 'choose' a slot to store our donations
+    0x00 sload                                      //[slot[0]]
+    0x20 mstore                                     //[]
+    0x40 push0 sha3                                 //[key(donations[user])]
+
+    //get mapping of users donations - returns a value
+    dup1 sload dup1 dup1                            //[d[user],d[user],d[user],key(d[user])]
+
+    //compare sum of donation and curr donation and require its not less than the previous donation
+    //to account for overflow
+    callvalue add lt iszero                         //[res,donations[user],key(donations[user])]
+    not_zero_or_negative jumpi                      //[donations[user],key(donations[user])]
+        push0 push0 revert
+    not_zero_or_negative:
+    callvalue add                                   //[new_donations_amt,key(donations[user])]
+
+    //now we store the new value at the key by using sload
+    swap1 sstore
+
+
+    //now we need to grab the msg.value sent with this call and add it to the users donations
+
+    donate:
+    //repeat to get donations
+    caller push0                                    //[0,msg.sender]
+    mstore                                          //[]
+
+    0x00 sload                                      //[slot[0]]
+    0x20 mstore                                     //[]
+    0x40 push0 sha3                                 //[key(donations[user])]
+
+    sload                                           //[donations[user]]
+
+    push0 mstore                                    //[]
+    0x20 push0 return
 }

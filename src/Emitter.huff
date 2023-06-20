@@ -13,5 +13,16 @@
 
 
  #define macro MAIN() = takes(0) returns(0) {
-    
+    push0 calldataload 0xe0 shr
+    dup1 __FUNC_SIG(value) eq value jumpi
+
+    push0 dup1 revert
+
+    value:
+    //we'll use log2 here since the function signature is always the first indexed (except in the case of an anonymous event) and then only one of the values is indexed. In this case we only need the first input because the second one is not being indexed.
+
+        0x04 calldataload                       //[input1]
+        __EVENT_HASH(Value)                     //[fn_sig, input1]
+        0x20 push0                              //[offset,size,sig,i1]
+        log2
  }

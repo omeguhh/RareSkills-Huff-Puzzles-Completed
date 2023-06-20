@@ -10,5 +10,42 @@
 #define function maxOfArray(uint256[]) payable returns(uint256)
 
 #define macro MAIN() = takes(0) returns(0) {
+    //iterate through array, return max val | revert if empty | revert if unrecognized fn called
+    pc calldataload 0xe0 shr                                  //[fn_selector]
+
+    dup1 __FUNC_SIG(maxOfArray) eq maxOfArray jumpi           
+
+    0x00 0x00 revert
+
+//dealing with another dynamic array - dynamic types are encoded in 3 words - 32 bytes.
+// first is: location of dynamic data
+// second: size of dynamic data
+// third: value of data
+    maxOfArray:
+    0x44  0x24                                                  //[length,value]
+
+    0x44 calldataload push0                                    //[idx(0),arr[0],length,value]
+    //checking to make sure array length not 0
+    0x24 calldataload start jumpi
+        0x00 0x00 revert
+    continue:
+        //compare current index with length of array to determine end of loop
+        0x01 add                                               //[idx(i+1),arr[i+1],lt,val]
+        dup1 dup4 eq end jumpi
+        start:
+        dup1 0x20 mul dup5 add calldataload                    //[arr[i+1], idx(i), arr[i],lt,val]
+
+        //check if old val > new val
+        dup3 gt continue jumpi                                 //[idx(i),arr[i],lt,val]
+
+        //iterate to next item in index
+        dup1 0x20 mul dup5 add calldataload                    //[arr[i+1], idx(i), arr[i],lt,val]
+        swap2 pop                                              //[idx(i),arr[i+1],lt,val]
+        continue jump
+
+    end:
+    swap1 push0 mstore                                         //[idx(i),lt,val]
+    0x20 push0 return
+
    
 }

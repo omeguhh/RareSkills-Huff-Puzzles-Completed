@@ -13,5 +13,18 @@
 
 
  #define macro MAIN() = takes(0) returns(0) {
-    
+
+    push0 calldataload 0xe0 shr
+    dup1 __FUNC_SIG(makeContract) eq make_Contract jumpi
+
+    push0 dup1 revert
+
+    make_Contract:
+    //make bytecode to represent 0xcaffe. 
+        0x6b620caffe60005260206000f3600052600c601451600052600c6000f3
+        push0 mstore                                        // []
+        0x1d 0x03 push0                                     // [value, offset, codesize]
+        create                                              // [addresss]
+        push0 mstore                                        // []
+        0x20 push0 return                                   // []  
  }
