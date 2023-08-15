@@ -17,6 +17,12 @@ contract Add1Test is Test, NonMatchingSelectorHelper {
         add1 = Add1(HuffDeployer.config().deploy("Add1"));
     }
 
+    function testOverflowRevert() public {
+        vm.expectRevert(bytes(""));
+        uint256 max_256 = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
+        add1.add1(max_256);
+    }
+
     function testAdd1() public {
         assertEq(add1.add1(41), 42, "Add1(41) expected to return 42");
         assertEq(add1.add1(23), 24, "Add1(23) expected to return 24");
