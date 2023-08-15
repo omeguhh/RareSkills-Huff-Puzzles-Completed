@@ -19,8 +19,7 @@ contract Add1Test is Test, NonMatchingSelectorHelper {
 
     function testOverflowRevert() public {
         vm.expectRevert(bytes(""));
-        uint256 max_256 = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
-        add1.add1(max_256);
+        add1.add1(type(uint256).max);
     }
 
     function testAdd1() public {
