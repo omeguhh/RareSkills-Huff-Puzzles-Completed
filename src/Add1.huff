@@ -23,8 +23,9 @@ push0 dup1 revert
 add1:
     //take value off top of stack and add add 1
     0x04 calldataload                   //[val]
-    dup1 0x01 add                       //[(1+val),val]
-    push0 swap1 gt                            //[res(1 or 0),val]
+    dup1                                //[val, val]
+    dup1 0x01 add                       //[(1+val),val, val]
+    gt                                  //[((1+val) > val),val] (1+val) result must be > val else we have an overflow
     success jumpi
         //check for overflow
         0x00 0x00 revert
